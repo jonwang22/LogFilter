@@ -36,12 +36,16 @@
 # The objective is to find all the suspicious messages in the auth_log.log file and output it into suspicious_activity.log file.
 # The main keywords that we are looking for within the suspicious messages are "Failed", "Unauthorized", and "Error". These three keywords are unique to the suspicious messages and searching for them within the file will not flag any of the normal messages.
 
+# Identifying my variables to use for my script. Setting the source file, destination file, keywords array, and a tempfile to temporarily hold onto our output.
 logsource="/var/log/auth_log.log"
 logdestination="/home/ubuntu/scripts/LogFilterScript/suspicious_activity.log"
 keywords=("Failed" "Unauthorized" "Error")
 tempfile="/home/ubuntu/scripts/LogFilterScript/tempfile"
+
+# Adding some user friendly output for our users notifying what is happening.
 echo "Searching $logsource for suspicious activity..."
 
+# Adding some formatting to the destination file for our output to make it visually pleasing. We're redirecting our echo statements into our destination file.
 echo " " >> $logdestination
 echo "=============================================================================" >> $logdestination
 echo "Suspicious Log Messages found on $(date)" >> $logdestination
@@ -54,6 +58,9 @@ echo " " >> $logdestination
 #	grep -i "$keyword" $logsource | sort >> $logdestination
 # done
 
+# Here, while we are reading the input file line by line, we will look for every word within every line we iterate through and if we find the keyword matching any word
+# within that line via regex, then we will write that line into our tempfile for now. 
+# We add a break because we don't need to look for any more instances of that word within the line to determine our action so we move on to the next line.
 while IFS= read -r line;
 do
 	for keyword in "${keywords[@]}";
@@ -66,11 +73,15 @@ do
 	done
 done < $logsource
 
+# Here we are taking the tempfile we created during our while loop, we're sorting the contents and then redirecting that to the destination file.
+# Once we've redirected the stdout, we will then remove that tempfile.
 sort "$tempfile" >> "$logdestination"
 rm "$tempfile"
 
+# Skipping a line within the destination file for user visuals
 echo " " >> $logdestination
 
+# Notifying user that script is complete.
 echo "Search completed, please look at the $logdestination for results"
 
 # Setting up the cronjob, commenting out command because the cronjob has already been set on ec2 instance.
