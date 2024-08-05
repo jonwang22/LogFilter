@@ -61,13 +61,15 @@ echo " " >> $logdestination
 # Here, while we are reading the input file line by line, we will look for every word within every line we iterate through and if we find the keyword matching any word
 # within that line via regex, then we will write that line into our tempfile for now. 
 # We add a break because we don't need to look for any more instances of that word within the line to determine our action so we move on to the next line.
+# IFS= is setting the Internal Field Separator to empty so that each line is read as-is. 
+# read is the command to read the line from input, -r prevents backslash escapes, line is our variable the read line is stored in.
 while IFS= read -r line;
 do
 	for keyword in "${keywords[@]}";
 	do
-		if [[ "${line,,}" =~ ${keyword,,} ]];
+		if [[ "${line,,}" =~ ${keyword,,} ]]; # ",," is a way for us to test the string in lowercase for the keyword in lowercase without compromising the original state of the line.
 		then
-			echo "$line" >> "$tempfile"
+			echo "$line" >> "$tempfile" 
 			break
 		fi
 	done
